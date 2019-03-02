@@ -4,6 +4,7 @@
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium import webdriver
 import datetime
+import getpass
 import time
 import re
 import os
@@ -16,6 +17,10 @@ class Taobao(object):
     def __init__(self):
         self.url = input("Please input the url of the production:\n")
         self.buy_time = input("Time(Formal:yyyy-mm-dd hh:mm:ss):")
+        self.need_autopay = input("Do you need pay automatically?yes/no")
+
+        if self.need_autopay == "yes":
+            self.pay_pw = getpass.getpass("Password:")
 
         if "detail.tmall.com" in self.url:
             self.mall = "tmall"
@@ -66,7 +71,7 @@ class Taobao(object):
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
                         break
-                    time.sleep(0.05)
+                    time.sleep(0.03)
                 except:
                     # self.driver.refresh()
                     # self.driver.implicitly_wait(0.5)
@@ -81,13 +86,34 @@ class Taobao(object):
                     self.driver.find_element_by_css_selector(btn_order).click()
                     break
             except:
-                pass
+                time.sleep(0.01)
 
-        time.sleep(30)
-        if "https://cashiergtj.alipay.com" in self.driver.current_url:
+        if self.need_autopay == "yes":
+            self.pay()
+        else:
             print("Successfully! Please pay for it!")
-            self.driver.quit()
-            os._exit(0)
+
+    def pay(self):
+        pay_input = "#payPassword_rsainput"
+        pay_btn = "#J_authSubmit"
+
+        while True:
+            try:
+                if self.driver.find_element_by_css_selector(pay_input):
+                    self.driver.find_element_by_css_selector(pay_input).send_keys(self.pay_pw)
+                    break
+            except:
+                time.sleep(0.01)
+
+        while True:
+            try:
+                if self.driver.find_element_by_css_selector(pay_btn):
+                    self.driver.find_element_by_css_selector(pay_btn).click()
+                    break
+            except:
+                time.sleep(0.01)
+
+        print("Pay Successfully!")
 
 
 if __name__ == "__main__":
