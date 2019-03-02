@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium import webdriver
 import datetime
 import time
 import re
 import os
 
+desired_capabilities = DesiredCapabilities.CHROME
+desired_capabilities["pageLoadStrategy"] = "none"
+
 
 class Taobao(object):
     def __init__(self):
-        self.driver = webdriver.Chrome()
-        self.driver.maximize_window()
-
         self.url = input("Please input the url of the production:\n")
         self.buy_time = input("Time(Formal:yyyy-mm-dd hh:mm:ss):")
 
@@ -21,10 +22,13 @@ class Taobao(object):
         else:
             self.mall = "taobao"
 
+        self.driver = webdriver.Chrome()
+        self.driver.maximize_window()
+
         self.is_login = 0
 
     def login(self):
-        # 手动登陆(请使用扫码登陆)
+        # Login by Scan code
         print("Please login!")
 
         login_url = "https://login.taobao.com/member/login.jhtml"
@@ -32,14 +36,14 @@ class Taobao(object):
         self.driver.implicitly_wait(10)
 
         while "https://www.taobao.com/" not in self.driver.current_url:
-            time.sleep(5)
+            time.sleep(1)
         username = re.search("<strong class=\"J_MemberNick member-nick\">(.*?)</strong>", self.driver.page_source)
         if username:
             print("Login account:", username.group(1))
             self.is_login = 1
         else:
             print("Login failed.")
-            self.login()
+            # self.login()
 
     def buy(self):
         if self.is_login == 0:
@@ -57,30 +61,33 @@ class Taobao(object):
             btn_order = '#submitOrder_1 > div > a'
 
         while True:
-            # 现在时间大于预设时间则开售抢购
             if datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') >= self.buy_time:
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
                         break
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 except:
-                    time.sleep(0.3)
-            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
-            self.driver.refresh()
-            self.driver.implicitly_wait(0.7)
+                    # self.driver.refresh()
+                    # self.driver.implicitly_wait(0.5)
+                    time.sleep(0.1)
+            else:
+                print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
 
         while True:
             try:
-                # 找到"立即下单"，点击，
+                # Find "立即下单"，Click，
                 if self.driver.find_element_by_css_selector(btn_order):
                     self.driver.find_element_by_css_selector(btn_order).click()
-                if "https://cashiergtj.alipay.com" in self.driver.current_url:
-                    self.driver.quit()
-                    print("Successfully!Please pay for it!")
                     break
             except:
-                time.sleep(0.5)
+                pass
+
+        time.sleep(30)
+        if "https://cashiergtj.alipay.com" in self.driver.current_url:
+            print("Successfully! Please pay for it!")
+            self.driver.quit()
+            os._exit(0)
 
 
 if __name__ == "__main__":
