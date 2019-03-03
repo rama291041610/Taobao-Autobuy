@@ -17,7 +17,7 @@ class Taobao(object):
     def __init__(self):
         self.url = input("Please input the url of the production:\n")
         self.buy_time = input("Time(Formal:yyyy-mm-dd hh:mm:ss):")
-        self.need_autopay = input("Do you need pay automatically?yes/no")
+        self.need_autopay = input("Do you need pay automatically?(yes/no)")
 
         if self.need_autopay == "yes":
             self.pay_pw = getpass.getpass("Password:")
@@ -32,13 +32,16 @@ class Taobao(object):
 
         self.is_login = 0
 
+    def load_page(self, url):
+        self.driver.get(url)
+        self.driver.implicitly_wait(5)
+
     def login(self):
         # Login by Scan code
         print("Please login!")
 
         login_url = "https://login.taobao.com/member/login.jhtml"
-        self.driver.get(login_url)
-        self.driver.implicitly_wait(10)
+        self.load_page(login_url)
 
         while "https://www.taobao.com/" not in self.driver.current_url:
             time.sleep(1)
@@ -53,8 +56,7 @@ class Taobao(object):
     def buy(self):
         if self.is_login == 0:
             self.login()
-        self.driver.get(self.url)
-        self.driver.implicitly_wait(10)
+        self.load_page(self.url)
 
         if self.mall == "taobao":
             #"立即购买"的css_selector
@@ -67,6 +69,8 @@ class Taobao(object):
 
         while True:
             if datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') >= self.buy_time:
+                if '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格' in self.driver.page_source:
+                    self.driver.refresh()
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
@@ -75,7 +79,7 @@ class Taobao(object):
                 except:
                     # self.driver.refresh()
                     # self.driver.implicitly_wait(0.5)
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             else:
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
 
