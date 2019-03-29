@@ -77,6 +77,8 @@ class Taobao(object):
             if datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') >= self.buy_time:
                 if '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格' in self.driver.page_source:
                     self.driver.refresh()
+                elif '聚划算活动商品，' in self.driver.page_source:
+                    self.driver.refresh()
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
