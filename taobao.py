@@ -19,15 +19,21 @@ class Taobao(object):
         self.buy_time = input("Time(Formal:yyyy-mm-dd hh:mm:ss):")
         self.need_autopay = input("Do you need pay automatically?(yes/no)")
 
+        if self.buy_time == '':
+            self.buy_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+
         if self.need_autopay == "yes":
             self.pay_pw = getpass.getpass("Password:")
 
-        if "detail.tmall.com" in self.url:
+        if "tmall" in self.url:
             self.mall = "tmall"
         else:
             self.mall = "taobao"
 
-        self.driver = webdriver.Chrome()
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--log-level=3')
+
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
         self.driver.maximize_window()
 
         self.is_login = 0
