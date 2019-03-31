@@ -20,7 +20,9 @@ class Taobao(object):
         self.need_autopay = input("Do you need pay automatically?(yes/no)")
 
         if self.buy_time == '':
-            self.buy_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+            self.buy_time = datetime.datetime.now()
+        else:
+            self.buy_time = datetime.datetime.strptime(self.buy_time, '%Y-%m-%d %H:%M:%S')
 
         if self.need_autopay == "yes":
             self.pay_pw = getpass.getpass("Password:")
@@ -44,20 +46,13 @@ class Taobao(object):
 
     def login(self):
         # Login by Scan code
-        print("Please login!")
-
         login_url = "https://login.taobao.com/member/login.jhtml"
         self.load_page(login_url)
 
         while "https://www.taobao.com/" not in self.driver.current_url:
             time.sleep(1)
-        username = re.search("<strong class=\"J_MemberNick member-nick\">(.*?)</strong>", self.driver.page_source)
-        if username:
-            print("Login account:", username.group(1))
-            self.is_login = 1
-        else:
-            print("Login failed.")
-            # self.login()
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Login Successfully.")
+        self.is_login = 1
 
     def buy(self):
         if self.is_login == 0:
@@ -69,25 +64,29 @@ class Taobao(object):
             btn_buy = '#J_juValid > div.tb-btn-buy > a'
             #"立即下单"的css_selector
             btn_order = '#submitOrder_1 > div.wrapper > a'
+            juhuasuan = '聚划算活动商品，'
+            confirm_order = "buy.taobao.com"
         else:
             btn_buy = '#J_LinkBuy'
             btn_order = '#submitOrder_1 > div > a'
+            juhuasuan = '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格'
+            confirm_order = "buy.tmall.com"
 
         while True:
-            if datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') >= self.buy_time:
-                if '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格' in self.driver.page_source:
-                    self.driver.refresh()
-                elif '聚划算活动商品，' in self.driver.page_source:
+            if datetime.datetime.now() >= self.buy_time:
+                if juhuasuan in self.driver.page_source:
                     self.driver.refresh()
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
-                        break
                     time.sleep(0.03)
                 except:
                     # self.driver.refresh()
                     # self.driver.implicitly_wait(0.5)
-                    time.sleep(0.05)
+                    time.sleep(0.03)
+                finally:
+                    if confirm_order in self.driver.current_url:
+                        break
             else:
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
 
@@ -96,14 +95,16 @@ class Taobao(object):
                 # Find "立即下单"，Click，
                 if self.driver.find_element_by_css_selector(btn_order):
                     self.driver.find_element_by_css_selector(btn_order).click()
-                    break
             except:
                 time.sleep(0.01)
+            finally:
+                if "alipay.com" in self.driver.current_url:
+                    break
 
         if self.need_autopay == "yes":
             self.pay()
         else:
-            print("Successfully! Please pay for it!")
+            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Successfully! Please pay for it!")
 
     def pay(self):
         pay_input = "#payPassword_rsainput"
@@ -125,7 +126,7 @@ class Taobao(object):
             except:
                 time.sleep(0.01)
 
-        print("Pay Successfully!")
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Pay Successfully!")
 
 
 if __name__ == "__main__":
