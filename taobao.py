@@ -40,6 +40,9 @@ class Taobao(object):
 
         self.is_login = 0
 
+    def __del__(self):
+        self.driver.quit()
+
     def load_page(self, url):
         self.driver.get(url)
         self.driver.implicitly_wait(5)
@@ -76,17 +79,16 @@ class Taobao(object):
             if datetime.datetime.now() >= self.buy_time:
                 if juhuasuan in self.driver.page_source:
                     self.driver.refresh()
+                    #time.sleep(0.001)
+                    continue
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
+                        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Click!")
+                        break
                     time.sleep(0.03)
                 except:
-                    # self.driver.refresh()
-                    # self.driver.implicitly_wait(0.5)
                     time.sleep(0.03)
-                finally:
-                    if confirm_order in self.driver.current_url:
-                        break
             else:
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
 
@@ -95,16 +97,16 @@ class Taobao(object):
                 # Find "立即下单"，Click，
                 if self.driver.find_element_by_css_selector(btn_order):
                     self.driver.find_element_by_css_selector(btn_order).click()
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Click!")
+                    break
             except:
                 time.sleep(0.01)
-            finally:
-                if "alipay.com" in self.driver.current_url:
-                    break
 
         if self.need_autopay == "yes":
             self.pay()
         else:
             print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Successfully! Please pay for it!")
+            time.sleep(42)
 
     def pay(self):
         pay_input = "#payPassword_rsainput"
@@ -127,6 +129,7 @@ class Taobao(object):
                 time.sleep(0.01)
 
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Pay Successfully!")
+        time.sleep(42)
 
 
 if __name__ == "__main__":
