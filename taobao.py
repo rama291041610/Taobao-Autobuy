@@ -65,42 +65,34 @@ class Taobao(object):
         if self.mall == "taobao":
             #"立即购买"的css_selector
             btn_buy = '#J_juValid > div.tb-btn-buy > a'
-            #"立即下单"的css_selector
+            #"提交订单"的css_selector
             btn_order = '#submitOrder_1 > div.wrapper > a'
             juhuasuan = '聚划算活动商品，'
-            confirm_order = "buy.taobao.com"
         else:
             btn_buy = '#J_LinkBuy'
             btn_order = '#submitOrder_1 > div > a'
             juhuasuan = '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格'
-            confirm_order = "buy.tmall.com"
 
         while True:
             if datetime.datetime.now() >= self.buy_time:
                 if juhuasuan in self.driver.page_source:
                     self.driver.refresh()
-                    #time.sleep(0.001)
+                    time.sleep(0.008)
                     continue
                 try:
                     if self.driver.find_element_by_css_selector(btn_buy):
                         self.driver.find_element_by_css_selector(btn_buy).click()
-                        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Click!")
-                        break
-                    time.sleep(0.03)
                 except:
-                    time.sleep(0.03)
+                    pass
+                try:
+                    if self.driver.find_element_by_css_selector(btn_order):
+                        self.driver.find_element_by_css_selector(btn_order).click()
+                        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Order Successfully!")
+                        break
+                except:
+                    pass
             else:
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
-
-        while True:
-            try:
-                # Find "立即下单"，Click，
-                if self.driver.find_element_by_css_selector(btn_order):
-                    self.driver.find_element_by_css_selector(btn_order).click()
-                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Click!")
-                    break
-            except:
-                time.sleep(0.01)
 
         if self.need_autopay == "yes":
             self.pay()
