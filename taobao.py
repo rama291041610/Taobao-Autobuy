@@ -75,22 +75,22 @@ class Taobao(object):
 
         while True:
             if datetime.datetime.now() >= self.buy_time:
+                try:
+                    self.driver.find_element_by_css_selector(btn_buy).click()
+                except:
+                    pass
+
+                try:
+                    self.driver.find_element_by_css_selector(btn_order).click()
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Order Successfully!")
+                    break
+                except:
+                    pass
+
                 if juhuasuan in self.driver.page_source:
                     self.driver.refresh()
-                    time.sleep(0.008)
+                    time.sleep(0.003)
                     continue
-                try:
-                    if self.driver.find_element_by_css_selector(btn_buy):
-                        self.driver.find_element_by_css_selector(btn_buy).click()
-                except:
-                    pass
-                try:
-                    if self.driver.find_element_by_css_selector(btn_order):
-                        self.driver.find_element_by_css_selector(btn_order).click()
-                        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Order Successfully!")
-                        break
-                except:
-                    pass
             else:
                 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), "Monitoring!")
 
