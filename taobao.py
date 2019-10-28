@@ -66,11 +66,11 @@ class Taobao(object):
             #"立即购买"的css_selector
             btn_buy = '#J_juValid > div.tb-btn-buy > a'
             #"提交订单"的css_selector
-            btn_order = '#submitOrder_1 > div.wrapper > a'
+            btn_order = '#submitOrderPC_1 > div.wrapper > a'
             juhuasuan = '聚划算活动商品，'
         else:
             btn_buy = '#J_LinkBuy'
-            btn_order = '#submitOrder_1 > div > a'
+            btn_order = '#submitOrderPC_1 > div > a'
             juhuasuan = '您只有在聚划算页面点击“马上抢”，才可享受此商品的优惠价格'
 
         while True:
